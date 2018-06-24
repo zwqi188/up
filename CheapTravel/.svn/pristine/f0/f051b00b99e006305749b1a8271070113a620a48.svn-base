@@ -1,0 +1,85 @@
+package com.ifly.travel.control;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.List;
+
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.commons.fileupload.FileItem;
+import org.apache.commons.fileupload.FileUploadException;
+import org.apache.commons.fileupload.disk.DiskFileItemFactory;
+import org.apache.commons.fileupload.servlet.ServletFileUpload;
+
+/**
+ * Servlet implementation class AjaxUploadFile
+ */
+@WebServlet("/AjaxUploadFile.do")
+public class AjaxUploadFile extends HttpServlet {
+	private static final long serialVersionUID = 1L;
+       
+    /**
+     * @see HttpServlet#HttpServlet()
+     */
+    public AjaxUploadFile() {
+        super();
+        // TODO Auto-generated constructor stub
+    }
+
+	/**
+	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
+	 */
+	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		// TODO Auto-generated method stub
+	}
+
+	/**
+	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
+	 */
+	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		boolean isMultips = ServletFileUpload.isMultipartContent(request);
+		if (isMultips) {
+			DiskFileItemFactory factory = new DiskFileItemFactory();
+			ServletContext servletContext = this.getServletConfig().getServletContext();
+			File repository = (File)servletContext.getAttribute("javax.servlet.context.tempdir");
+			factory.setRepository(repository);
+			ServletFileUpload upload = new ServletFileUpload(factory);
+			try {
+				List<FileItem> iems = upload.parseRequest(request);
+				for (FileItem item : iems) {
+					if (item.isFormField()) {
+						
+					} else {
+						String rootPath = servletContext.getRealPath("//");
+						String saveFoldePath = rootPath+File.separator+"imgCity";
+						File saveFolder = new File(saveFoldePath);
+						if (!saveFolder.exists()) {
+							saveFolder.mkdir();
+						}
+						String saveFilePath = saveFoldePath+File.separator+item.getName();
+						File uploadFile = new File(saveFilePath);
+						item.write(uploadFile);
+						
+						response.setContentType("text/html;charset=utf-8");
+						PrintWriter out = response.getWriter();
+						out.print("<script>parent.showImg('/imgCity/"+item.getName()+"');</script>");
+					}
+				}
+			} catch (FileUploadException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+		}
+	}
+
+}

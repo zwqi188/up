@@ -1,0 +1,50 @@
+package com.ifly.travel.control;
+
+import java.io.IOException;
+import java.util.List;
+
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import com.ifly.travel.dao.ShareDao;
+import com.ifly.travel.entity.MyShare;
+
+/**
+ * Servlet implementation class GetShareImgsServlet
+ */
+@WebServlet("/GetShareImgsServlet.do")
+public class GetShareImgsServlet extends HttpServlet {
+	private static final long serialVersionUID = 1L;
+       
+    /**
+     * @see HttpServlet#HttpServlet()
+     */
+    public GetShareImgsServlet() {
+        super();
+        // TODO Auto-generated constructor stub
+    }
+
+	/**
+	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
+	 */
+	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		ShareDao shareDao=new ShareDao();
+		List<MyShare> myShares=shareDao.getMySharesByDate();
+		List<MyShare> mySharesbynum=shareDao.getMySharesByNum();
+		request.getSession().setAttribute("myShares", myShares);
+		System.out.println(myShares.size()+"-"+mySharesbynum.size());
+		request.getSession().setAttribute("mySharesbynum", mySharesbynum);
+		request.getRequestDispatcher("imgShare.jsp").forward(request, response);
+	}
+
+	/**
+	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
+	 */
+	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		// TODO Auto-generated method stub
+	}
+
+}

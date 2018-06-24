@@ -1,0 +1,84 @@
+package com.ifly.travel.control;
+
+import java.io.IOException;
+import java.util.List;
+
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import com.ifly.travel.dao.NpassangerDao;
+import com.ifly.travel.dao.PassangerDao;
+import com.ifly.travel.dao.ShareDao;
+import com.ifly.travel.dao.SignSpotDao;
+import com.ifly.travel.dao.UserDao;
+import com.ifly.travel.entity.MyShare;
+
+/**
+ * Servlet implementation class LoginServlet
+ */
+@WebServlet("/LoginServlet.do")
+public class LoginServlet extends HttpServlet {
+	private static final long serialVersionUID = 1L;
+    private UserDao userDao=new UserDao();
+    private SignSpotDao signDao = new SignSpotDao();
+    private  ShareDao shareDao=new ShareDao();
+    private NpassangerDao passangerDao = new NpassangerDao(); 
+    /**
+     * @see HttpServlet#HttpServlet()
+     */
+    public LoginServlet() {
+        super();
+        // TODO Auto-generated constructor stub
+    }
+
+	/**
+	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
+	 */
+	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		// TODO Auto-generated method stub
+	}
+
+	/**
+	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
+	 */
+	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		String username=request.getParameter("username");
+		request.getSession().setAttribute("username", username);
+		String password=request.getParameter("password");
+		String selflogin=request.getParameter("selflogin");
+		if(userDao.isExists(username,password)){
+			
+			if(selflogin!=null&&selflogin.equals("selflogin")){
+				Cookie usernameCookie=new Cookie("username", username);
+				Cookie passwordCookie=new Cookie("password", password);
+				usernameCookie.setMaxAge(60*60*24*7);
+				passwordCookie.setMaxAge(60*60*24*7);
+				usernameCookie.setPath("/");
+				passwordCookie.setPath("/");
+				response.addCookie(usernameCookie);
+				response.addCookie(passwordCookie);
+			}
+		    getServletContext().setAttribute("username",username );
+		    List<String> allCitys = signDao.getAllCitys();
+		    request.getSession().setAttribute("allCitys", allCitys);
+		    
+		    List<String> passangers=passangerDao.getPassanger(username);
+			request.getSession().setAttribute("passangers", passangers);
+		    
+			/*List<MyShare> myShares=shareDao.getMySharesByDate();
+			List<MyShare> mySharesbynum=shareDao.getMySharesByNum();
+			request.getSession().setAttribute("myShares", myShares);
+			request.getSession().setAttribute("mySharesbynum", mySharesbynum);*/
+			
+			request.getRequestDispatcher("GetCitySignspots.do").forward(request, response);
+		}else{
+			request.getSession().setAttribute("username", username);
+			response.sendRedirect("login.jsp");
+		}
+	}
+
+}
